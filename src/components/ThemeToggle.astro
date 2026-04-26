@@ -1,0 +1,42 @@
+---
+import config from "../site.config";
+// Only renders if darkMode === "auto"
+const enabled = config.design.darkMode === "auto";
+const storageKey = `${config.domain}-theme`;
+---
+{enabled && (
+  <button
+    id="theme-toggle"
+    aria-label="Cambia tema"
+    class="p-2 rounded transition-colors"
+    style="hover:background:var(--color-divider)"
+    title="Cambia tema chiaro/scuro"
+  >
+    <span id="theme-icon-light" class="hidden text-sm" aria-hidden="true">☀</span>
+    <span id="theme-icon-dark" class="text-sm" aria-hidden="true">☽</span>
+  </button>
+)}
+
+{enabled && (
+  <script define:vars={{ storageKey }}>
+    const root = document.documentElement;
+    const btn = document.getElementById('theme-toggle');
+    const iconLight = document.getElementById('theme-icon-light');
+    const iconDark = document.getElementById('theme-icon-dark');
+
+    function applyTheme(dark) {
+      root.classList.toggle('dark', dark);
+      iconLight?.classList.toggle('hidden', !dark);
+      iconDark?.classList.toggle('hidden', dark);
+      localStorage.setItem(storageKey, dark ? 'dark' : 'light');
+    }
+
+    const stored = localStorage.getItem(storageKey);
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    applyTheme(stored === 'dark' || (!stored && prefersDark));
+
+    btn?.addEventListener('click', () => {
+      applyTheme(!root.classList.contains('dark'));
+    });
+  </script>
+)}

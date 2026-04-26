@@ -1,0 +1,65 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import config from "../site.config";
+
+if (!config.pages.galleria) {
+  return Astro.redirect("/");
+}
+
+// Placeholder: pipeline injects real images via src/data/gallery.ts or similar
+interface GalleryImage {
+  src: string;
+  alt: string;
+  caption: string;
+}
+
+const images: GalleryImage[] = [];
+---
+<BaseLayout
+  title="Galleria"
+  description={`Galleria immagini di ${config.name}`}
+>
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="mb-12">
+      <p
+        class="text-xs font-medium uppercase tracking-widest mb-3"
+        style="color:var(--color-accent)"
+      >
+        Immagini
+      </p>
+      <h1
+        class="font-bold mb-4"
+        style={`font-family:var(--font-display);font-size:clamp(2rem,5vw,3.5rem);color:var(--color-fg);line-height:1.1`}
+      >
+        Galleria
+      </h1>
+    </div>
+
+    {images.length > 0 ? (
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {images.map((img) => (
+          <figure
+            class="group border overflow-hidden rounded-sm"
+            style="border-color:var(--color-divider)"
+          >
+            <div class="aspect-[4/3] overflow-hidden" style="background:var(--color-divider)">
+              <img
+                src={img.src}
+                alt={img.alt}
+                loading="lazy"
+                class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+              />
+            </div>
+            <figcaption class="p-4">
+              <p class="text-sm font-medium" style="color:var(--color-fg)">{img.caption}</p>
+            </figcaption>
+          </figure>
+        ))}
+      </div>
+    ) : (
+      <p style="color:var(--color-muted)">
+        Le immagini appariranno qui una volta caricate.
+      </p>
+    )}
+  </div>
+</BaseLayout>

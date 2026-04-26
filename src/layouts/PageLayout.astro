@@ -1,0 +1,47 @@
+---
+import BaseLayout from "./BaseLayout.astro";
+import { breadcrumbSchema } from "../lib/schema";
+import { buildCanonical } from "../lib/seo";
+import config from "../site.config";
+
+interface Props {
+  title: string;
+  description?: string;
+  schema?: Record<string, unknown> | Record<string, unknown>[];
+}
+
+const { title, description, schema } = Astro.props;
+
+const crumbs = [
+  { name: config.name, url: `https://${config.domain}/` },
+  { name: title, url: buildCanonical(Astro.url.pathname) },
+];
+const breadcrumb = breadcrumbSchema(crumbs);
+const schemas = schema
+  ? [breadcrumb, ...(Array.isArray(schema) ? schema : [schema])]
+  : [breadcrumb];
+---
+<BaseLayout title={title} description={description} schema={schemas}>
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <!-- Breadcrumb -->
+    <nav aria-label="Breadcrumb" class="mb-8 text-xs" style="color:var(--color-muted)">
+      <ol class="flex items-center gap-2">
+        <li><a href="/" class="no-underline hover:underline" style="color:var(--color-muted)">{config.name}</a></li>
+        <li aria-hidden="true">/</li>
+        <li aria-current="page">{title}</li>
+      </ol>
+    </nav>
+
+    <div class="max-w-3xl">
+      <h1
+        class="font-bold mb-8 leading-tight"
+        style={`font-family:var(--font-display);font-size:clamp(2rem,5vw,3.5rem);color:var(--color-fg)`}
+      >
+        {title}
+      </h1>
+      <div class="article-body text-sm leading-relaxed" style="color:var(--color-fg)">
+        <slot />
+      </div>
+    </div>
+  </div>
+</BaseLayout>

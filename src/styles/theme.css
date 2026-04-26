@@ -1,0 +1,80 @@
+/* ── Design-system CSS custom properties ── */
+:root {
+  --color-primary: #000000;
+  --color-accent: #3b82f6;
+  --color-bg: #ffffff;
+  --color-fg: #000000;
+  --color-muted: #71717a;   /* zinc-500 */
+  --color-divider: #e4e4e7; /* zinc-200 */
+  --font-display: "Playfair Display", serif;
+  --font-body: "Inter", sans-serif;
+  --content-max: 720px;
+}
+
+/* ── Style variants ── */
+[data-style="editorial"] {
+  /* defaults already above — editorial = narrow prose + drop caps */
+  --content-max: 720px;
+}
+
+[data-style="bold"] {
+  --content-max: 1100px;
+  /* bold = full-bleed, heavier weight display */
+}
+
+[data-style="modern"] {
+  --content-max: 900px;
+  /* modern = asymmetric grid, tighter line-height */
+}
+
+[data-style="elegant"] {
+  --content-max: 760px;
+  /* elegant = serif throughout, extra letter-spacing */
+}
+
+/* ── Dark mode overrides ── */
+.dark {
+  --color-bg: #0a0a0a;
+  --color-fg: #fafafa;
+  --color-muted: #a1a1aa;
+  --color-divider: #27272a;
+}
+
+/* ── Style-variant typography ── */
+[data-style="editorial"] .article-body > p:first-of-type::first-letter {
+  font-family: var(--font-display);
+  font-size: 4.5rem;
+  font-weight: 700;
+  float: left;
+  line-height: 0.8;
+  margin-right: 0.1em;
+  margin-top: 0.05em;
+  color: var(--color-primary);
+}
+
+[data-style="bold"] h1,
+[data-style="bold"] h2 {
+  font-weight: 900;
+  letter-spacing: -0.03em;
+}
+
+[data-style="modern"] body {
+  line-height: 1.5;
+}
+
+[data-style="modern"] h1,
+[data-style="modern"] h2,
+[data-style="modern"] h3 {
+  letter-spacing: -0.02em;
+}
+
+[data-style="elegant"] body {
+  font-family: var(--font-display);
+}
+
+[data-style="elegant"] h1,
+[data-style="elegant"] h2,
+[data-style="elegant"] h3 {
+  letter-spacing: 0.04em;
+  font-weight: 600;
+}

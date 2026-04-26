@@ -1,0 +1,151 @@
+---
+import config from "../site.config";
+
+interface Props {
+  subject?: string;
+  topics?: string[];
+}
+
+const { subject, topics = [] } = Astro.props;
+const defaultSubject = subject ?? "Contatto dal sito";
+---
+<form id="lead-form" class="space-y-5" novalidate aria-label="Modulo di contatto">
+
+  <!-- Honeypot -->
+  <div aria-hidden="true" style="position:absolute;left:-9999px;opacity:0;pointer-events:none">
+    <label for="lf-website">Non compilare questo campo</label>
+    <input type="text" id="lf-website" name="website" tabindex="-1" autocomplete="off" />
+  </div>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+    <div>
+      <label for="lf-nome" class="block text-sm font-medium mb-1.5" style="color:var(--color-fg)">
+        Nome <span aria-hidden="true" style="color:var(--color-accent)">*</span>
+      </label>
+      <input
+        type="text"
+        id="lf-nome"
+        name="nome"
+        required
+        autocomplete="name"
+        placeholder="Il tuo nome"
+        class="w-full px-3 py-2.5 border rounded text-sm focus:outline-none transition"
+        style="border-color:var(--color-divider);background:var(--color-bg);color:var(--color-fg)"
+      />
+    </div>
+    <div>
+      <label for="lf-email" class="block text-sm font-medium mb-1.5" style="color:var(--color-fg)">
+        Email <span aria-hidden="true" style="color:var(--color-accent)">*</span>
+      </label>
+      <input
+        type="email"
+        id="lf-email"
+        name="email"
+        required
+        autocomplete="email"
+        placeholder={`tua@email.it`}
+        class="w-full px-3 py-2.5 border rounded text-sm focus:outline-none transition"
+        style="border-color:var(--color-divider);background:var(--color-bg);color:var(--color-fg)"
+      />
+    </div>
+  </div>
+
+  {config.leadCapture.phone && (
+    <div>
+      <label for="lf-telefono" class="block text-sm font-medium mb-1.5" style="color:var(--color-fg)">
+        Telefono
+      </label>
+      <input
+        type="tel"
+        id="lf-telefono"
+        name="telefono"
+        autocomplete="tel"
+        placeholder="+39 000 000 0000"
+        class="w-full px-3 py-2.5 border rounded text-sm focus:outline-none transition"
+        style="border-color:var(--color-divider);background:var(--color-bg);color:var(--color-fg)"
+      />
+    </div>
+  )}
+
+  <div>
+    <label for="lf-oggetto" class="block text-sm font-medium mb-1.5" style="color:var(--color-fg)">
+      Oggetto
+    </label>
+    {topics.length > 0 ? (
+      <select
+        id="lf-oggetto"
+        name="oggetto"
+        class="w-full px-3 py-2.5 border rounded text-sm focus:outline-none transition"
+        style="border-color:var(--color-divider);background:var(--color-bg);color:var(--color-fg)"
+      >
+        <option value="">{defaultSubject}</option>
+        {topics.map((t) => <option value={t}>{t}</option>)}
+      </select>
+    ) : (
+      <input
+        type="text"
+        id="lf-oggetto"
+        name="oggetto"
+        placeholder={defaultSubject}
+        class="w-full px-3 py-2.5 border rounded text-sm focus:outline-none transition"
+        style="border-color:var(--color-divider);background:var(--color-bg);color:var(--color-fg)"
+      />
+    )}
+  </div>
+
+  <div>
+    <label for="lf-messaggio" class="block text-sm font-medium mb-1.5" style="color:var(--color-fg)">
+      Messaggio <span aria-hidden="true" style="color:var(--color-accent)">*</span>
+    </label>
+    <textarea
+      id="lf-messaggio"
+      name="messaggio"
+      required
+      rows="5"
+      placeholder="Scrivi qui il tuo messaggio..."
+      class="w-full px-3 py-2.5 border rounded text-sm focus:outline-none transition resize-y"
+      style="border-color:var(--color-divider);background:var(--color-bg);color:var(--color-fg)"
+    ></textarea>
+  </div>
+
+  <div class="flex items-center gap-4 flex-wrap">
+    <button
+      type="submit"
+      class="px-8 py-3 font-medium text-sm rounded transition-colors"
+      style="background:var(--color-primary);color:var(--color-bg)"
+    >
+      Invia messaggio
+    </button>
+    <p class="text-xs" style="color:var(--color-muted)">
+      Oppure scrivi a
+      <a href={`mailto:${config.email}`} class="hover:underline" style="color:var(--color-accent)">
+        {config.email}
+      </a>
+    </p>
+  </div>
+</form>
+
+<script define:vars={{ email: config.email }}>
+  const form = document.getElementById('lead-form');
+  form?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    // Honeypot check
+    const website = form.querySelector('[name="website"]');
+    if (website && website.value) return;
+
+    const data = new FormData(form);
+    const nome = String(data.get('nome') ?? '');
+    const userEmail = String(data.get('email') ?? '');
+    const telefono = String(data.get('telefono') ?? '');
+    const oggetto = String(data.get('oggetto') ?? 'Contatto dal sito');
+    const messaggio = String(data.get('messaggio') ?? '');
+
+    const bodyParts = [`Nome: ${nome}`, `Email: ${userEmail}`];
+    if (telefono) bodyParts.push(`Telefono: ${telefono}`);
+    bodyParts.push('', messaggio);
+
+    const body = encodeURIComponent(bodyParts.join('\n'));
+    const subject = encodeURIComponent(oggetto);
+    window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
+  });
+</script>

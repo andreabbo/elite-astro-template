@@ -1,0 +1,225 @@
+---
+import config from "../site.config";
+
+interface Props {
+  title: string;
+  subtitle?: string;
+  lead?: string;
+  ctaPrimary?: { label: string; href: string };
+  ctaSecondary?: { label: string; href: string };
+  image?: { src: string; alt: string };
+}
+
+const { title, subtitle, lead, ctaPrimary, ctaSecondary, image } = Astro.props;
+const style = config.design.style;
+---
+
+{style === "bold" && image ? (
+  <!-- Bold: full-bleed image with overlay -->
+  <section class="relative min-h-[60vh] flex items-center overflow-hidden">
+    <img
+      src={image.src}
+      alt={image.alt}
+      class="absolute inset-0 w-full h-full object-cover"
+      loading="eager"
+    />
+    <div class="absolute inset-0" style="background:rgba(0,0,0,0.55)"></div>
+    <div class="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-24 text-white">
+      {subtitle && (
+        <p class="text-sm font-medium uppercase tracking-widest mb-6 opacity-80">{subtitle}</p>
+      )}
+      <h1
+        class="font-black leading-none mb-6"
+        style="font-family:var(--font-display);font-size:clamp(3rem,8vw,6rem)"
+      >
+        {title}
+      </h1>
+      {lead && (
+        <p class="text-xl max-w-2xl leading-relaxed opacity-90 mb-8">{lead}</p>
+      )}
+      {(ctaPrimary || ctaSecondary) && (
+        <div class="flex flex-wrap gap-4">
+          {ctaPrimary && (
+            <a
+              href={ctaPrimary.href}
+              class="px-8 py-3 font-semibold text-sm rounded no-underline transition-colors"
+              style="background:var(--color-accent);color:#ffffff"
+            >
+              {ctaPrimary.label}
+            </a>
+          )}
+          {ctaSecondary && (
+            <a
+              href={ctaSecondary.href}
+              class="px-8 py-3 font-semibold text-sm rounded border no-underline transition-colors"
+              style="border-color:rgba(255,255,255,0.6);color:#ffffff"
+            >
+              {ctaSecondary.label}
+            </a>
+          )}
+        </div>
+      )}
+    </div>
+  </section>
+) : style === "modern" ? (
+  <!-- Modern: asymmetric split layout -->
+  <section
+    class="border-b py-16 md:py-24"
+    style="border-color:var(--color-divider)"
+  >
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 grid md:grid-cols-2 gap-12 items-center">
+      <div>
+        {subtitle && (
+          <p
+            class="text-xs font-medium uppercase tracking-widest mb-4"
+            style="color:var(--color-accent)"
+          >
+            {subtitle}
+          </p>
+        )}
+        <h1
+          class="font-bold leading-tight mb-6"
+          style="font-family:var(--font-display);font-size:clamp(2rem,5vw,3.5rem);color:var(--color-fg);letter-spacing:-0.02em"
+        >
+          {title}
+        </h1>
+        {lead && (
+          <p class="text-lg leading-relaxed mb-8" style="color:var(--color-muted)">{lead}</p>
+        )}
+        {(ctaPrimary || ctaSecondary) && (
+          <div class="flex flex-wrap gap-3">
+            {ctaPrimary && (
+              <a
+                href={ctaPrimary.href}
+                class="px-6 py-2.5 font-medium text-sm rounded no-underline transition-colors"
+                style="background:var(--color-accent);color:#ffffff"
+              >
+                {ctaPrimary.label}
+              </a>
+            )}
+            {ctaSecondary && (
+              <a
+                href={ctaSecondary.href}
+                class="px-6 py-2.5 font-medium text-sm rounded border no-underline transition-colors"
+                style="border-color:var(--color-divider);color:var(--color-fg)"
+              >
+                {ctaSecondary.label}
+              </a>
+            )}
+          </div>
+        )}
+      </div>
+      {image && (
+        <div class="rounded overflow-hidden aspect-[4/3]">
+          <img src={image.src} alt={image.alt} class="w-full h-full object-cover" loading="eager" />
+        </div>
+      )}
+    </div>
+  </section>
+) : style === "elegant" ? (
+  <!-- Elegant: centered serif, extra spacing -->
+  <section
+    class="border-b py-24 md:py-36 text-center"
+    style="border-color:var(--color-divider)"
+  >
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+      {subtitle && (
+        <p
+          class="text-xs font-medium uppercase tracking-[0.2em] mb-8"
+          style="color:var(--color-accent)"
+        >
+          {subtitle}
+        </p>
+      )}
+      <h1
+        class="font-semibold leading-tight mb-8"
+        style="font-family:var(--font-display);font-size:clamp(2.5rem,6vw,5rem);letter-spacing:0.04em;color:var(--color-fg)"
+      >
+        {title}
+      </h1>
+      {lead && (
+        <p
+          class="text-lg md:text-xl leading-relaxed mb-10 mx-auto"
+          style="color:var(--color-muted);max-width:560px"
+        >
+          {lead}
+        </p>
+      )}
+      {(ctaPrimary || ctaSecondary) && (
+        <div class="flex flex-wrap justify-center gap-4">
+          {ctaPrimary && (
+            <a
+              href={ctaPrimary.href}
+              class="px-8 py-3 font-medium text-sm rounded no-underline transition-colors"
+              style="background:var(--color-accent);color:#ffffff"
+            >
+              {ctaPrimary.label}
+            </a>
+          )}
+          {ctaSecondary && (
+            <a
+              href={ctaSecondary.href}
+              class="px-8 py-3 font-medium text-sm rounded border no-underline transition-colors"
+              style="border-color:var(--color-divider);color:var(--color-fg)"
+            >
+              {ctaSecondary.label}
+            </a>
+          )}
+        </div>
+      )}
+    </div>
+  </section>
+) : (
+  <!-- Editorial (default): large headline, no image -->
+  <section
+    class="py-20 md:py-28 border-b"
+    style="border-color:var(--color-divider)"
+  >
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      {subtitle && (
+        <p
+          class="text-xs font-medium uppercase tracking-widest mb-6"
+          style="color:var(--color-accent)"
+        >
+          {subtitle}
+        </p>
+      )}
+      <h1
+        class="font-bold leading-none mb-6"
+        style="font-family:var(--font-display);font-size:clamp(2.5rem,6vw,5rem);color:var(--color-fg)"
+      >
+        {title}
+      </h1>
+      {lead && (
+        <p
+          class="text-lg md:text-xl leading-relaxed max-w-2xl"
+          style="color:var(--color-muted)"
+        >
+          {lead}
+        </p>
+      )}
+      {(ctaPrimary || ctaSecondary) && (
+        <div class="flex flex-wrap gap-4 mt-8">
+          {ctaPrimary && (
+            <a
+              href={ctaPrimary.href}
+              class="px-6 py-3 font-medium text-sm rounded no-underline transition-colors"
+              style="background:var(--color-accent);color:#ffffff"
+            >
+              {ctaPrimary.label}
+            </a>
+          )}
+          {ctaSecondary && (
+            <a
+              href={ctaSecondary.href}
+              class="px-6 py-3 font-medium text-sm rounded border no-underline transition-colors"
+              style="border-color:var(--color-divider);color:var(--color-fg)"
+            >
+              {ctaSecondary.label}
+            </a>
+          )}
+        </div>
+      )}
+    </div>
+  </section>
+)}

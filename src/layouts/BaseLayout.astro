@@ -1,0 +1,152 @@
+---
+import "../styles/global.css";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import CookieBanner from "../components/CookieBanner.astro";
+import WhatsAppButton from "../components/WhatsAppButton.astro";
+import SchemaJsonLd from "../components/SchemaJsonLd.astro";
+import { buildTitle, buildDescription, buildCanonical, buildOgImage } from "../lib/seo";
+import { organizationSchema, websiteSchema } from "../lib/schema";
+import config from "../site.config";
+
+interface Props {
+  title?: string;
+  description?: string;
+  ogImage?: string;
+  canonical?: string;
+  noindex?: boolean;
+  schema?: Record<string, unknown> | Record<string, unknown>[];
+}
+
+const {
+  title,
+  description,
+  ogImage = buildOgImage(),
+  canonical,
+  noindex = false,
+  schema,
+} = Astro.props;
+
+const metaTitle = buildTitle(title);
+const metaDesc = buildDescription(description);
+const canonicalUrl = canonical ?? buildCanonical(Astro.url.pathname);
+
+// Build Google Fonts URL from config
+const displayFont = config.design.fontPairing.display;
+const bodyFont = config.design.fontPairing.body;
+const uniqueFonts = [...new Set([displayFont, bodyFont])];
+const fontsParam = uniqueFonts
+  .map((f) => `family=${encodeURIComponent(f)}:ital,wght@0,400;0,600;0,700;1,400`)
+  .join("&");
+const googleFontsUrl = `https://fonts.googleapis.com/css2?${fontsParam}&display=swap`;
+
+// CSS vars from palette
+const primary = config.design.palette.primary;
+const accent = config.design.palette.accent;
+const background = config.design.palette.background;
+
+const navItems: { href: string; label: string }[] = [
+  ...(config.pages.chiSiamo ? [{ href: "/chi-siamo", label: "Chi Siamo" }] : []),
+  ...(config.pages.serviziMenu?.enabled
+    ? [{ href: "/servizi", label: config.pages.serviziMenu.label }]
+    : []),
+  ...(config.pages.galleria ? [{ href: "/galleria", label: "Galleria" }] : []),
+  ...(config.pages.eventi ? [{ href: "/eventi", label: "Eventi" }] : []),
+  ...(config.pages.blog ? [{ href: "/blog", label: "Blog" }] : []),
+  ...(config.pages.faq ? [{ href: "/faq", label: "FAQ" }] : []),
+  ...(config.pages.contatti ? [{ href: "/contatti", label: "Contatti" }] : []),
+];
+
+// Dark mode class on <html>
+const darkModeClass =
+  config.design.darkMode === "always"
+    ? "dark"
+    : config.design.darkMode === "never"
+    ? ""
+    : ""; // "auto" = managed by JS
+---
+<!doctype html>
+<html
+  lang={config.language}
+  data-style={config.design.style}
+  class={darkModeClass}
+>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content={primary} />
+  <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="canonical" href={canonicalUrl} />
+
+  <!-- Google Fonts preconnect -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href={googleFontsUrl} />
+
+  <!-- Dynamic palette -->
+  <style define:vars={{ primary, accent, background }}>
+    :root {
+      --color-primary: var(--primary);
+      --color-accent: var(--accent);
+      --color-bg: var(--background);
+      --font-display: v-display;
+      --font-body: v-body;
+    }
+  </style>
+  <!-- Font family vars (can't use define:vars for string values with spaces) -->
+  <style set:html={`
+    :root {
+      --font-display: "${displayFont}", serif;
+      --font-body: "${bodyFont}", sans-serif;
+    }
+  `} />
+
+  <title>{metaTitle}</title>
+  <meta name="description" content={metaDesc} />
+  {noindex && <meta name="robots" content="noindex,nofollow" />}
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content={config.name} />
+  <meta property="og:title" content={metaTitle} />
+  <meta property="og:description" content={metaDesc} />
+  <meta property="og:url" content={canonicalUrl} />
+  <meta property="og:image" content={ogImage} />
+  <meta property="og:locale" content={`${config.language}_${config.address.country.toUpperCase()}`} />
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content={metaTitle} />
+  <meta name="twitter:description" content={metaDesc} />
+  <meta name="twitter:image" content={ogImage} />
+
+  <!-- Structured data site-wide -->
+  <SchemaJsonLd schema={organizationSchema()} />
+  <SchemaJsonLd schema={websiteSchema()} />
+  {schema && <SchemaJsonLd schema={schema} />}
+
+  <!-- Theme init: prevent flash of wrong theme -->
+  {config.design.darkMode === "auto" && (
+    <script is:inline define:vars={{ storageKey: `${config.domain}-theme` }}>
+      (function () {
+        var s = localStorage.getItem(storageKey);
+        var d = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if (s === 'dark' || (!s && d)) document.documentElement.classList.add('dark');
+      })();
+    </script>
+  )}
+  {config.design.darkMode === "always" && (
+    <script is:inline>document.documentElement.classList.add('dark');</script>
+  )}
+</head>
+<body class="min-h-screen flex flex-col">
+  <Header navItems={navItems} />
+  <main class="flex-1">
+    <slot />
+  </main>
+  <Footer navItems={navItems} />
+  <CookieBanner />
+  <WhatsAppButton />
+</body>
+</html>

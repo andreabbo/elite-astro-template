@@ -1,0 +1,128 @@
+---
+import BaseLayout from "./BaseLayout.astro";
+import { articleSchema, breadcrumbSchema } from "../lib/schema";
+import { buildCanonical, buildOgImage } from "../lib/seo";
+import config from "../site.config";
+
+interface Props {
+  title: string;
+  description: string;
+  date: string;
+  category?: string;
+  author?: string;
+  readingTime?: number;
+  tags?: string[];
+  slug?: string;
+  image?: string;
+}
+
+const {
+  title,
+  description,
+  date,
+  category,
+  author = config.name,
+  readingTime,
+  tags = [],
+  slug,
+  image,
+} = Astro.props;
+
+const canonicalUrl = buildCanonical(`/blog/${slug ?? ""}`);
+const ogImage = image ?? buildOgImage(slug);
+
+const formatted = new Date(date).toLocaleDateString(
+  `${config.language}-${config.address.country.toUpperCase()}`,
+  { day: "numeric", month: "long", year: "numeric" }
+);
+
+const artSchema = articleSchema({
+  headline: title,
+  description,
+  datePublished: date,
+  url: canonicalUrl,
+  image: ogImage,
+});
+
+const crumbs = [
+  { name: config.name, url: `https://${config.domain}/` },
+  { name: "Blog", url: `https://${config.domain}/blog` },
+  { name: title, url: canonicalUrl },
+];
+const schemas = [artSchema, breadcrumbSchema(crumbs)];
+---
+<BaseLayout
+  title={title}
+  description={description}
+  canonical={canonicalUrl}
+  ogImage={ogImage}
+  schema={schemas}
+>
+  <article class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <!-- Breadcrumb -->
+    <nav aria-label="Breadcrumb" class="mb-8 text-xs" style="color:var(--color-muted)">
+      <ol class="flex flex-wrap items-center gap-2">
+        <li><a href="/" class="no-underline hover:underline" style="color:var(--color-muted)">{config.name}</a></li>
+        <li aria-hidden="true">/</li>
+        <li><a href="/blog" class="no-underline hover:underline" style="color:var(--color-muted)">Blog</a></li>
+        <li aria-hidden="true">/</li>
+        <li aria-current="page" class="truncate max-w-[200px]">{title}</li>
+      </ol>
+    </nav>
+
+    <!-- Article header -->
+    <header class="max-w-3xl mb-12">
+      {(category || tags.length > 0) && (
+        <div class="flex flex-wrap items-center gap-2 mb-6">
+          {category && <span class="tag-chip">{category}</span>}
+          {tags.slice(0, 3).map((t) => <span class="tag-chip">{t}</span>)}
+        </div>
+      )}
+      <h1
+        class="font-bold leading-tight mb-6"
+        style={`font-family:var(--font-display);font-size:clamp(1.75rem,4vw,3rem);color:var(--color-fg)`}
+      >
+        {title}
+      </h1>
+      <p class="text-lg leading-relaxed mb-6" style="color:var(--color-muted)">{description}</p>
+      <div
+        class="flex flex-wrap items-center gap-4 text-sm border-t pt-4"
+        style="border-color:var(--color-divider);color:var(--color-muted)"
+      >
+        <span>{author}</span>
+        <span aria-hidden="true">&middot;</span>
+        <time datetime={date}>{formatted}</time>
+        {readingTime && (
+          <>
+            <span aria-hidden="true">&middot;</span>
+            <span>{readingTime} min di lettura</span>
+          </>
+        )}
+      </div>
+    </header>
+
+    <!-- Article body -->
+    <div class="article-body" style="color:var(--color-fg)">
+      <slot />
+    </div>
+
+    <!-- TOC slot (sidebar, rendered only when provided) -->
+    <aside aria-label="Indice dei contenuti">
+      <slot name="toc" />
+    </aside>
+
+    <!-- Back link -->
+    <div
+      class="max-w-3xl border-t mt-16 pt-8"
+      style="border-color:var(--color-divider)"
+    >
+      <a
+        href="/blog"
+        class="text-sm font-medium no-underline hover:underline"
+        style="color:var(--color-accent)"
+      >
+        &larr; Torna al Blog
+      </a>
+    </div>
+  </article>
+</BaseLayout>

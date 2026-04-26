@@ -1,0 +1,126 @@
+---
+import config from "../site.config";
+
+interface Props {
+  navItems: { href: string; label: string }[];
+}
+
+const { navItems } = Astro.props;
+const year = new Date().getFullYear();
+
+// Social links map
+const socialLinks = [
+  { key: "instagram", label: "Instagram", href: config.social?.instagram },
+  { key: "facebook", label: "Facebook", href: config.social?.facebook },
+  { key: "linkedin", label: "LinkedIn", href: config.social?.linkedin },
+  { key: "youtube", label: "YouTube", href: config.social?.youtube },
+  { key: "twitter", label: "Twitter / X", href: config.social?.twitter },
+].filter((s) => !!s.href);
+---
+<footer
+  class="border-t mt-24 py-12"
+  style="border-color:var(--color-divider);background:var(--color-bg)"
+>
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
+
+      <!-- Brand -->
+      <div>
+        <p
+          class="font-bold text-lg mb-2"
+          style="font-family:var(--font-display);color:var(--color-fg)"
+        >
+          {config.name}
+        </p>
+        <p class="text-sm leading-relaxed" style="color:var(--color-muted)">
+          {config.description}
+        </p>
+        {socialLinks.length > 0 && (
+          <div class="flex flex-wrap gap-3 mt-4">
+            {socialLinks.map((s) => (
+              <a
+                href={s.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="text-xs font-medium no-underline transition-colors"
+                style="color:var(--color-muted)"
+                aria-label={s.label}
+              >
+                {s.label}
+              </a>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <!-- Mini-sitemap -->
+      <div>
+        <p
+          class="text-xs font-medium uppercase tracking-widest mb-4"
+          style="color:var(--color-muted)"
+        >
+          Sezioni
+        </p>
+        <nav class="flex flex-col gap-2" aria-label="Mappa del sito">
+          {navItems.map(({ label, href }) => (
+            <a
+              href={href}
+              class="text-sm no-underline transition-colors"
+              style="color:var(--color-muted)"
+            >
+              {label}
+            </a>
+          ))}
+        </nav>
+      </div>
+
+      <!-- NAP -->
+      <div>
+        <p
+          class="text-xs font-medium uppercase tracking-widest mb-4"
+          style="color:var(--color-muted)"
+        >
+          Contatti
+        </p>
+        <address class="not-italic text-sm space-y-1 leading-relaxed" style="color:var(--color-muted)">
+          <p>{config.address.street}</p>
+          <p>
+            {config.address.postalCode ? `${config.address.postalCode} ` : ""}{config.address.city}
+          </p>
+          <a
+            href={`mailto:${config.email}`}
+            class="block no-underline transition-colors hover:underline"
+            style="color:var(--color-muted)"
+          >
+            {config.email}
+          </a>
+          {config.phone && (
+            <a
+              href={`tel:${config.phone}`}
+              class="block no-underline transition-colors hover:underline"
+              style="color:var(--color-muted)"
+            >
+              {config.phone}
+            </a>
+          )}
+        </address>
+      </div>
+    </div>
+
+    <div
+      class="border-t mt-10 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs"
+      style="border-color:var(--color-divider);color:var(--color-muted)"
+    >
+      <p>&copy; {year} {config.name}. Tutti i diritti riservati.</p>
+      <p>
+        <a
+          href="/faq#privacy"
+          class="no-underline transition-colors hover:underline"
+          style="color:var(--color-muted)"
+        >
+          Privacy &amp; Cookie
+        </a>
+      </p>
+    </div>
+  </div>
+</footer>

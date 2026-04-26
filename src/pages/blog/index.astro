@@ -1,0 +1,59 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import ArticleCard from "../../components/ArticleCard.astro";
+import { getCollection } from "astro:content";
+import config from "../../site.config";
+
+if (!config.pages.blog) {
+  return Astro.redirect("/");
+}
+
+const allArticoli = await getCollection("articoli");
+const sorted = allArticoli.sort(
+  (a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime()
+);
+---
+<BaseLayout
+  title="Blog"
+  description={`Tutti gli articoli di ${config.name}`}
+>
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="mb-12">
+      <p
+        class="text-xs font-medium uppercase tracking-widest mb-3"
+        style="color:var(--color-accent)"
+      >
+        Archivio
+      </p>
+      <h1
+        class="font-bold mb-4"
+        style={`font-family:var(--font-display);font-size:clamp(2rem,5vw,3.5rem);color:var(--color-fg);line-height:1.1`}
+      >
+        Blog
+      </h1>
+      <p style="color:var(--color-muted)">
+        {sorted.length} articol{sorted.length === 1 ? "o" : "i"} pubblicat{sorted.length === 1 ? "o" : "i"}
+      </p>
+    </div>
+
+    {sorted.length > 0 ? (
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {sorted.map((a, i) => (
+          <ArticleCard
+            title={a.data.title}
+            slug={a.data.slug ?? a.id.replace(/\.md$/, "")}
+            date={a.data.date}
+            category={a.data.category}
+            excerpt={a.data.excerpt}
+            image={a.data.hero}
+            featured={i === 0}
+          />
+        ))}
+      </div>
+    ) : (
+      <p style="color:var(--color-muted)">
+        Nessun articolo pubblicato. Aggiungi file Markdown in <code>src/content/articoli/</code>.
+      </p>
+    )}
+  </div>
+</BaseLayout>

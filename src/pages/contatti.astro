@@ -1,0 +1,40 @@
+---
+import PageLayout from "../layouts/PageLayout.astro";
+import LeadForm from "../components/LeadForm.astro";
+import ClickToCall from "../components/ClickToCall.astro";
+import config from "../site.config";
+
+if (!config.pages.contatti) {
+  return Astro.redirect("/");
+}
+---
+<PageLayout
+  title="Contatti"
+  description={`Contatta ${config.name} — siamo a tua disposizione`}
+>
+  <p class="mb-8 leading-relaxed" style="color:var(--color-muted)">
+    Siamo disponibili per rispondere a qualsiasi domanda. Scrivi tramite il modulo
+    o contattaci direttamente utilizzando i recapiti indicati.
+  </p>
+
+  <!-- NAP quick reference -->
+  <div class="mb-8 space-y-2 text-sm" style="color:var(--color-muted)">
+    <p>{config.address.street}, {config.address.city}</p>
+    <p>
+      <a href={`mailto:${config.email}`} class="hover:underline" style="color:var(--color-accent)">
+        {config.email}
+      </a>
+    </p>
+    {config.phone && (
+      <div>
+        <ClickToCall />
+      </div>
+    )}
+  </div>
+
+  {config.leadCapture.form && (
+    <div class="mt-8">
+      <LeadForm />
+    </div>
+  )}
+</PageLayout>

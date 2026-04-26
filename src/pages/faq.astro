@@ -1,0 +1,38 @@
+---
+import PageLayout from "../layouts/PageLayout.astro";
+import { getEntry, render } from "astro:content";
+import { faqSchema } from "../lib/schema";
+import config from "../site.config";
+
+if (!config.pages.faq) {
+  return Astro.redirect("/");
+}
+
+const entry = await getEntry("pages", "faq");
+if (!entry) return Astro.redirect("/");
+
+const { Content } = await render(entry);
+
+// Generic FAQ items — pipeline overwrites with client-specific ones
+const faqItems = [
+  {
+    question: "Come posso contattarvi?",
+    answer:
+      "Puoi contattarci tramite il modulo nella pagina Contatti o scrivendo direttamente alla nostra email.",
+  },
+  {
+    question: "Come gestite i dati personali e i cookie?",
+    answer:
+      "Utilizziamo solo cookie tecnici essenziali. Non usiamo cookie di profilazione né tracker di terze parti.",
+  },
+];
+
+const schema = faqSchema(faqItems);
+---
+<PageLayout
+  title={entry.data.title}
+  description={entry.data.description}
+  schema={schema}
+>
+  <Content />
+</PageLayout>
