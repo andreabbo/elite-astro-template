@@ -116,3 +116,115 @@ export function breadcrumbSchema(
     })),
   };
 }
+
+/** WebSite schema with SearchAction — emit on home page */
+export function homeWebsiteSchema(): Record<string, unknown> {
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: config.name,
+    url: BASE_URL,
+    description: config.description,
+    inLanguage: config.language,
+    potentialAction: {
+      "@type": "SearchAction",
+      target: {
+        "@type": "EntryPoint",
+        urlTemplate: `${BASE_URL}/blog/?q={search_term_string}`,
+      },
+      "query-input": "required name=search_term_string",
+    },
+  };
+}
+
+/** AboutPage schema */
+export function aboutPageSchema(opts?: {
+  name?: string;
+  description?: string;
+}): Record<string, unknown> {
+  return {
+    "@context": "https://schema.org",
+    "@type": "AboutPage",
+    name: opts?.name ?? `Chi Siamo — ${config.name}`,
+    url: `${BASE_URL}/chi-siamo/`,
+    description: opts?.description ?? config.description,
+    isPartOf: { "@type": "WebSite", url: BASE_URL },
+  };
+}
+
+/** ContactPage schema with embedded Organization */
+export function contactPageSchema(): Record<string, unknown> {
+  const org: Record<string, unknown> = {
+    "@type": "Organization",
+    name: config.name,
+    url: BASE_URL,
+    email: config.email,
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: config.address.street,
+      addressLocality: config.address.city,
+      postalCode: config.address.postalCode ?? "",
+      addressCountry: config.address.country,
+    },
+  };
+  if (config.phone) org.telephone = config.phone;
+  return {
+    "@context": "https://schema.org",
+    "@type": "ContactPage",
+    name: `Contatti — ${config.name}`,
+    url: `${BASE_URL}/contatti/`,
+    isPartOf: { "@type": "WebSite", url: BASE_URL },
+    mainEntity: org,
+  };
+}
+
+/** Blog collection page schema */
+export function blogCollectionSchema(opts?: {
+  description?: string;
+}): Record<string, unknown> {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Blog",
+    name: `Blog — ${config.name}`,
+    url: `${BASE_URL}/blog/`,
+    description: opts?.description ?? config.description,
+    publisher: {
+      "@type": "Organization",
+      name: config.name,
+      url: BASE_URL,
+    },
+    inLanguage: config.language,
+    isPartOf: { "@type": "WebSite", url: BASE_URL },
+  };
+}
+
+/** ImageGallery / CollectionPage for image galleries */
+export function imageGallerySchema(opts: {
+  name: string;
+  description: string;
+  url: string;
+  images: Array<{ url: string; name: string; description?: string; creditText?: string }>;
+}): Record<string, unknown> {
+  return {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: opts.name,
+    description: opts.description,
+    url: opts.url,
+    mainEntity: {
+      "@type": "ItemList",
+      numberOfItems: opts.images.length,
+      itemListElement: opts.images.map((img, i) => ({
+        "@type": "ListItem",
+        position: i + 1,
+        item: {
+          "@type": "ImageObject",
+          contentUrl: img.url,
+          name: img.name,
+          ...(img.description ? { description: img.description } : {}),
+          ...(img.creditText ? { creditText: img.creditText } : {}),
+        },
+      })),
+    },
+  };
+}
